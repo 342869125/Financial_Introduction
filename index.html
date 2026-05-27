@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Mitigating Bias in Low-SNR Financial Reinforcement Learning via Quantum Representations">
+  <meta name="keywords" content="Financial RL, Quantum Computing, PQC, SAC, Portfolio Management, Low-SNR">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FPQC-SAC: Quantum Representations for Financial RL</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+  <!-- Bulma & Plugins -->
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  
+  <style>
+    /* 核心修改：强制全站背景为纯白，消除任何微小色差 */
+    html, body {
+      background-color: #ffffff !important;
+    }
+
+    section, .hero, .hero-body, .section, footer, .container {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+    }
+
+    /* 移除所有可能导致视觉颜色偏差的阴影 */
+    * {
+      box-shadow: none !important;
+    }
+
+    body { 
+      font-family: 'Noto Sans', sans-serif; 
+      color: #4a4a4a; 
+    }
+
+    .publication-title { 
+      font-family: 'Google Sans', sans-serif; 
+      font-weight: 800 !important; 
+      font-size: 2.8rem !important; 
+      color: #222222; 
+    }
+
+    .section-title { 
+      font-family: 'Google Sans', sans-serif; 
+      font-weight: 700 !important; 
+      font-size: 2.2rem !important; 
+      text-align: left; 
+      margin-bottom: 1.5rem;
+      color: #363636;
+    }
+
+    /* 截图中的高亮蓝色 */
+    .highlight-blue {
+      color: #3273dc;
+      font-weight: 700;
+    }
+
+    /* 左右布局微调 */
+    .column-text { 
+      padding-right: 3rem !important; 
+    }
+    
+    /* 图片样式：移除阴影，确保边缘纯净 */
+    .figure-img { 
+      border-radius: 0px; /* 移除圆角以防抗锯齿产生灰边 */
+      width: 100%; 
+      display: block;
+    }
+    
+    .figure-caption { 
+      font-size: 1rem; 
+      color: #7a7a7a; 
+      margin-top: 1.2rem; 
+      font-style: italic; 
+      text-align: left;
+      line-height: 1.5;
+    }
+
+    .header-icon {
+      margin-right: 15px;
+      vertical-align: middle;
+    }
+
+    /* BibTeX 背景也设为极淡的灰色以便区分，或者也可以设为白色 */
+    #BibTeX pre { 
+      background-color: #f8f8f8; 
+      border: 1px solid #eeeeee;
+      border-radius: 4px;
+      padding: 1.5rem; 
+    }
+  </style>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+
+<!-- Header Section -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Mitigating Bias in Low-SNR Financial Reinforcement Learning via Quantum Representations</h1>
+          
+          <div class="is-size-5 publication-authors" style="margin-bottom: 0.5rem;">
+            <span class="author-block"><em>Anonymous Author(s)</em></span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Affiliation · Address · email</span>
+          </div>
+          
+          <div class="is-size-6 publication-authors" style="margin-top: 0.8rem; color: #666;">
+            <span class="author-block">Submitted to 40th Conference on Neural Information Processing Systems (NeurIPS 2026)</span>
+          </div>
+
+          <div class="column has-text-centered" style="margin-top: 1rem;">
+            <div class="publication-links">
+              <a href="#" class="button is-normal is-rounded is-dark"><span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper</span></a>
+              <a href="#" class="button is-normal is-rounded is-dark"><span class="icon"><i class="ai ai-arxiv"></i></span><span>arXiv</span></a>
+              <a href="#" class="button is-normal is-rounded is-dark"><span class="icon"><i class="fab fa-github"></i></span><span>Code</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 1. Abstract Section (Top Image, Bottom Text) -->
+<section class="section">
+  <div class="container is-max-desktop">
+    
+    <!-- Top Part: Figure 1 -->
+    <!-- <div class="columns is-centered">
+      <div class="column is-11">
+        <div style="text-align: center;">
+          <img src="./static/images/Fig1.png" style="width: 100%; height: auto; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.08);" alt="Abstract Visualization">
+          <p class="figure-caption" style="font-size: 0.88rem; margin-top: 0.8rem; color: #666; font-style: italic;">
+            <strong>Figure 1:</strong> (a) Blind Exploration vs (b) Guided Exploration using ICT.
+          </p>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- Bottom Part: Abstract Text -->
+    <div class="columns is-centered" style="margin-top: 2rem;">
+      <div class="column is-11">
+        <h2 class="title is-4 section-title" style="margin-bottom: 1.2rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">
+          <span class="header-icon">📖</span> Abstract
+        </h2>
+        
+        <div class="content has-text-justified" style="font-size: 1.3rem; line-height: 1.6; color: #444;">
+          <p>
+            The financial market is a typical low <strong>Signal-to-Noise Ratio (SNR)</strong> setting, which can usually destabilize off-policy maximum-entropy methods like <strong>Soft Actor-Critic (SAC)</strong>. Specifically, noisy state representations may produce unreliable Q-value estimates, and bootstrapping amplifies these errors—a failure mode we call the <span style="color: #3273dc; font-weight: 600;">"Financial Entropy Trap"</span>.
+          </p>
+          <p>
+            In this paper, we propose <strong>FPQC-SAC</strong>, an efficient and plug-and-play SAC variant that places a compact and bounded <strong>Parameterized Quantum Circuit (PQC)</strong> before the actor and critic networks to constrain feature propagation at the representation level, rather than filtering raw inputs or regularizing Q-values after bootstrapping.
+          </p>
+          <p>
+            Notably, FPQC-SAC reduces the impact of extreme market fluctuations on Bellman target estimation, while trainable quantum entanglement preserves flexible cross-asset interactions. Empirical evaluations on real-world portfolio management tasks demonstrate that FPQC-SAC substantially enhances out-of-sample stability and cumulative returns by achieving a <span style="background-color: #fff4e5; padding: 2px 4px; border-radius: 3px; font-weight: bold;">66.89% relative gain</span> in cumulative return over standard unconstrained SAC and outperforms the best continuous-control deep reinforcement learning baseline by ~27%.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 1.5. Motivation Section (Left Text, Right Image) -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-vcentered is-variable is-8">
+      
+      <!-- Left Column: Logical Motivation -->
+      <div class="column is-6">
+        <h2 class="title is-4" style="margin-bottom: 0.8rem; display: flex; align-items: center;">
+          <span style="margin-right: 0.5rem;">📖</span> Motivation
+        </h2>
+        
+        <div class="content has-text-justified" style="font-size: 0.88rem; line-height: 1.45; color: #444;">
+          
+          <!-- 1. Low-SNR Financial Markets -->
+          <h3 style="font-size: 1rem; margin-bottom: 0.3rem; color: #222;">1. Low-SNR Financial Markets</h3>
+          <p style="margin-bottom: 0.6rem;">
+            Financial markets are inherently <strong>low signal-to-noise ratio (SNR)</strong> environments. Useful financial signals are often extremely weak, whereas short-term fluctuations, market microstructure noise, investor sentiment, and liquidity shocks are dominant. This makes models prone to fitting historical noise patterns, suffering severe performance degradation in out-of-sample testing.
+          </p>
+
+          <!-- 2. The Financial Entropy Trap -->
+          <h3 style="font-size: 1rem; margin-bottom: 0.3rem; color: #222;">2. The Financial Entropy Trap</h3>
+          <p style="margin-bottom: 0.6rem;">
+            The Actor-Critic architecture becomes significantly fragile in noise-dominant markets. Maximum-entropy RL methods like <strong>SAC</strong> explicitly maximize policy entropy to encourage exploration. However, entropy-driven stochastic exploration does not necessarily gather effective information—it may <strong>amplify noise-dominated update directions</strong>. This prevents the policy from stably capturing weak predictive signals, forming a self-reinforcing loop we call the <strong>"Financial Entropy Trap"</strong>.
+          </p>
+
+          <!-- 3. Limitations of Existing Approaches -->
+          <h3 style="font-size: 1rem; margin-bottom: 0.3rem; color: #222;">3. Limitations of Existing Approaches</h3>
+          <p style="margin-bottom: 0.6rem;">
+            Existing solutions face inherent limitations: <strong>Output-side regularization</strong> (clipped double-Q, ensemble critics) intervenes too late—once market noise has contaminated intermediate representations, posterior corrections can only provide after-the-fact mitigation. <strong>Input-side filtering</strong> (Kalman filtering, wavelet denoising) relies on strong handcrafted priors and often erases scarce valuable signals alongside the noise.
+          </p>
+
+          <!-- Summary Block -->
+          <div style="margin-top: 1rem; padding: 0.8rem; background-color: #f6f8fa; border-left: 4px solid #3273dc; border-radius: 4px;">
+            <p style="margin-bottom: 0; font-size: 0.85rem; line-height: 1.4;">
+              <strong>Key Insight:</strong> Neither approach fundamentally blocks the propagation of noise perturbations into value estimation while preserving weak financial signals. A <strong>representation-level</strong> solution is needed.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right Column: Image -->
+      <div class="column is-6">
+        <div style="text-align: center;">
+          <div style="padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+            <h3 style="color: white; font-size: 1.2rem; margin-bottom: 1rem;">📊 Financial Entropy Trap</h3>
+            <div style="text-align: left; font-size: 0.85rem; line-height: 1.6;">
+              <p style="margin-bottom: 0.8rem;">🔄 <strong>Noisy State</strong> → Unreliable Q-values</p>
+              <p style="margin-bottom: 0.8rem;">📈 <strong>Bootstrapping</strong> → Error Amplification</p>
+              <p style="margin-bottom: 0.8rem;">🎯 <strong>Erroneous Exploration</strong> → Policy Degradation</p>
+              <p>⬇️ <strong>Self-Reinforcing Loop</strong> → Financial Entropy Trap</p>
+            </div>
+            <div style="margin-top: 1.5rem; padding: 0.8rem; background: rgba(255,255,255,0.2); border-radius: 8px;">
+              <p style="font-size: 0.8rem; margin: 0;"><em>"Noise contaminates value estimation and guides erroneous exploration"</em></p>
+            </div>
+          </div>
+          <p style="font-size: 0.82rem; color: #666; margin-top: 0.8rem; font-style: italic;">
+            <strong>Figure 1:</strong> The Financial Entropy Trap: A self-reinforcing failure mode in maximum-entropy RL under low-SNR conditions.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- 2. Methodology Section: Top-Image, Bottom-Text -->
+<section class="section">
+  <div class="container is-max-desktop">
+    
+    <!-- Top Part: Architecture Diagram -->
+    <div class="columns is-centered">
+      <div class="column is-11">
+        <div style="text-align: center;">
+          <div style="padding: 2rem; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef;">
+            <h3 style="color: #3273dc; margin-bottom: 1.5rem;">FPQC-SAC Architecture</h3>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; font-size: 0.9rem;">
+              <div style="padding: 1rem; background: white; border-radius: 8px; border: 2px solid #764ba2;">
+                <strong>Market State X<sub>t</sub></strong><br/>
+                <small>Price, Volume, Tech Indicators</small>
+              </div>
+              <span style="font-size: 1.5rem;">→</span>
+              <div style="padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
+                <strong>Classical Pre-Net</strong><br/>
+                <small>Linear Compression (7-dim)</small>
+              </div>
+              <span style="font-size: 1.5rem;">→</span>
+              <div style="padding: 1rem; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border-radius: 8px;">
+                <strong>PQC (7-Qubit, 2-Layer)</strong><br/>
+                <small>R<sub>x</sub> Encoding → CNOT Entanglement</small>
+              </div>
+              <span style="font-size: 1.5rem;">→</span>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="padding: 0.8rem; background: #ff6b6b; color: white; border-radius: 8px;">
+                  <strong>Actor π<sub>φ</sub></strong>
+                </div>
+                <div style="padding: 0.8rem; background: #4ecdc4; color: white; border-radius: 8px;">
+                  <strong>Twin Critics Q<sub>ψ1,2</sub></strong>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size: 0.95rem; color: #666; margin-top: 1rem; font-style: italic;">
+            <strong>Figure 2:</strong> The FPQC-SAC architecture. A Parameterized Quantum Circuit (PQC) is embedded as a shared representation bottleneck between classical preprocessing and the Actor-Critic networks.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Part: Detailed Introduction -->
+    <div class="columns is-centered" style="margin-top: 2rem;">
+      <div class="column is-11">
+        <h2 class="title is-3 section-title" style="border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">
+          <span class="header-icon">🏗️</span> Methodology Details
+        </h2>
+        
+        <div class="content has-text-justified" style="font-size: 1.05rem; line-height: 1.6; color: #444;">
+          <p>
+            <strong>FPQC-SAC</strong> represents a paradigm shift in financial reinforcement learning by embedding a <strong>Parameterized Quantum Circuit (PQC)</strong> at the representation level. Instead of filtering raw inputs or regularizing Q-values after bootstrapping, we constrain feature propagation using quantum mechanical properties to naturally filter noise via complex hyperspherical interference.
+          </p>
+
+          <div class="columns">
+            <!-- Column 1: PQC Architecture -->
+            <div class="column">
+              <h4 style="color: #3273dc; margin-bottom: 0.5rem;">🔹 Hybrid Quantum-Classical Architecture</h4>
+              <p style="font-size: 1rem; margin-bottom: 1.2rem;">
+                The state space is compressed via a classical linear layer to a <strong>7-dimensional vector</strong>, aligned with the qubit topology. Features are embedded into quantum Hilbert space via continuous <strong>R<sub>x</sub> angle encoding</strong>. The unitary evolution utilizes <strong>L = 2 layers</strong> of circular CNOT entanglement and single-qubit rotations. The latent representation is derived from expectation values of <strong>Pauli-Z observables</strong>.
+              </p>
+
+              <h4 style="color: #3273dc; margin-bottom: 0.5rem;">🔹 Quantum Entanglement & Interference</h4>
+              <p style="font-size: 1rem;">
+                The circular <strong>CNOT chain</strong> diffuses local Brownian perturbations into a collective multi-body entangled state. Isotropic noise undergoes <strong>destructive interference</strong> upon measurement, while correlated drift signals experience <strong>constructive alignment</strong>. This treats noise and signal asymmetrically: scrambling isotropic noise while focusing coherent signals.
+              </p>
+            </div>
+
+            <!-- Column 2: Properties & Workflow -->
+            <div class="column">
+              <h4 style="color: #3273dc; margin-bottom: 0.5rem;">🔹 Variance Attenuation Property</h4>
+              <p style="font-size: 1rem; margin-bottom: 1.2rem;">
+                The PQC fundamentally attenuates variance via <strong>hyperspherical phase cancellation</strong>. Under unitary evolution, state ρ is confined to a norm-preserving complex hypersphere. Isotropic phase variations lacking structural correlation undergo destructive interference, exponentially attenuating output variance relative to input noise intensity.
+              </p>
+
+              <!-- Workflow Box -->
+              <div style="padding: 1rem; background-color: #f6f8fa; border-left: 5px solid #3273dc; border-radius: 4px;">
+                <h4 style="margin-top: 0; font-size: 1.1rem;">🚀 Key Mechanism</h4>
+                <p style="margin-bottom: 0; font-size: 0.95rem;">
+                  <strong>Phase Encoding</strong> → Converts spatial noise to phase variation<br/>
+                  <strong>Entanglement</strong> → Scrambles noise isotropically<br/>
+                  <strong>Measurement</strong> → Destructive interference neutralizes noise<br/>
+                  <strong>Signal Preservation</strong> → Coherent drift signals retained
+                </p>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 3. Results Section -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-multiline">
+      <!-- Title and description -->
+      <div class="column is-12">
+        <h2 class="title is-3 section-title">
+          <span class="header-icon">📊</span>Leaderboard: Trading Performance Results
+        </h2>
+        <div class="content">
+          <p>
+            Our FPQC-SAC framework consistently outperforms standard SAC and state-of-the-art DRL baselines across multiple portfolio configurations. 
+            Evaluated on real-world U.S. multi-asset portfolios from 2019-2021, covering the COVID-19 shock and recovery period.
+          </p>
+        </div>
+      </div>
+
+      <!-- Main Performance Table -->
+      <div class="column is-12">
+        <div class="table-container" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow-x: auto;">
+          <table class="table is-fullwidth is-hoverable" style="font-size: 0.9rem; vertical-align: middle;">
+            <thead style="background-color: #f5f7f9;">
+              <tr>
+                <th style="vertical-align: middle;">Model</th>
+                <th class="has-text-centered">CR%↑</th>
+                <th class="has-text-centered">AR%↑</th>
+                <th class="has-text-centered">SR↑</th>
+                <th class="has-text-centered">Sortino↑</th>
+                <th class="has-text-centered">Calmar↑</th>
+              </tr>
+            </thead>
+            
+            <tbody>
+              <tr style="background-color: #fcfcfc;">
+                <td colspan="6" class="has-text-centered" style="font-weight: bold; color: #555;">
+                  Main Experiment: Tech & Market-Index Portfolio (QQQ, SPY, MSFT, GOOGL, AMZN, AAPL)
+                </td>
+              </tr>
+              <tr>
+                <td>Buy & Hold (Market)</td>
+                <td class="has-text-centered">88.57±0.00</td>
+                <td class="has-text-centered">26.90±0.00</td>
+                <td class="has-text-centered">1.18±0.00</td>
+                <td class="has-text-centered">1.28±0.00</td>
+                <td class="has-text-centered">0.80±0.00</td>
+              </tr>
+              <tr style="background-color: #fff3cd;">
+                <td style="font-weight: bold; color: #856404;">FPQC-SAC (Ours)</td>
+                <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">195.32±26.94</td>
+                <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">50.05±5.15</td>
+                <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">1.71±0.15</td>
+                <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">2.13±0.19</td>
+                <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">1.75±0.20</td>
+              </tr>
+              <tr>
+                <td>SAC [Haarnoja et al.]</td>
+                <td class="has-text-centered">117.04±18.56</td>
+                <td class="has-text-centered">33.67±4.29</td>
+                <td class="has-text-centered">1.40±0.12</td>
+                <td class="has-text-centered">1.59±0.19</td>
+                <td class="has-text-centered">1.11±0.23</td>
+              </tr>
+              <tr>
+                <td>TD3 [Fujimoto et al.]</td>
+                <td class="has-text-centered">151.55±29.20</td>
+                <td class="has-text-centered">41.20±6.12</td>
+                <td class="has-text-centered">1.57±0.12</td>
+                <td class="has-text-centered">1.87±0.21</td>
+                <td class="has-text-centered">1.46±0.29</td>
+              </tr>
+              <tr>
+                <td>DDPG [Lillicrap et al.]</td>
+                <td class="has-text-centered">153.65±27.25</td>
+                <td class="has-text-centered">41.67±5.68</td>
+                <td class="has-text-centered">1.60±0.12</td>
+                <td class="has-text-centered">1.90±0.20</td>
+                <td class="has-text-centered">1.48±0.28</td>
+              </tr>
+              <tr>
+                <td>DroQ [Hiraoka et al.]</td>
+                <td class="has-text-centered">152.80±21.61</td>
+                <td class="has-text-centered">41.55±4.51</td>
+                <td class="has-text-centered">1.56±0.13</td>
+                <td class="has-text-centered">1.91±0.15</td>
+                <td class="has-text-centered">1.56±0.18</td>
+              </tr>
+              <tr>
+                <td>REDQ [Chen et al.]</td>
+                <td class="has-text-centered">147.87±23.48</td>
+                <td class="has-text-centered">40.48±5.16</td>
+                <td class="has-text-centered">1.57±0.14</td>
+                <td class="has-text-centered">1.85±0.20</td>
+                <td class="has-text-centered">1.44±0.24</td>
+              </tr>
+              <tr>
+                <td>CrossQ [Bhatt et al.]</td>
+                <td class="has-text-centered">148.19±38.63</td>
+                <td class="has-text-centered">40.32±8.21</td>
+                <td class="has-text-centered">1.54±0.26</td>
+                <td class="has-text-centered">1.87±0.34</td>
+                <td class="has-text-centered">1.53±0.36</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="help has-text-grey has-text-centered mt-3">
+          Table 1: Main experiment results on mainstream tech portfolio. CR=Cumulative Return, AR=Annualized Return, SR=Sharpe Ratio. Red indicates best performance.
+        </p>
+      </div>
+    </div>
+
+    <!-- Bottleneck Comparison Table -->
+    <div class="columns is-multiline" style="margin-top: 2rem;">
+      <div class="column is-12">
+        <h3 class="title is-4 section-title" style="font-size: 1.5rem;">
+          <span class="header-icon">🔬</span>Representation Bottleneck Analysis
+        </h3>
+        <div class="content">
+          <p>
+            Systematic comparison of classical representation bottlenecks vs. PQC (FPQC-SAC). Our quantum-based approach achieves the best return-stability trade-off with the lowest TD-variance and Q-gap.
+          </p>
+        </div>
+      </div>
+      
+      <div class="column is-12">
+        <div class="table-container" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow-x: auto;">
+          <table class="table is-fullwidth is-hoverable" style="font-size: 0.85rem; vertical-align: middle;">
+            <thead style="background-color: #f5f7f9;">
+              <tr>
+                <th>Model</th>
+                <th class="has-text-centered">CR%↑</th>
+                <th class="has-text-centered">SR↑</th>
+                <th class="has-text-centered">Q-gap↓</th>
+                <th class="has-text-centered">TD-var↓</th>
+                <th class="has-text-centered">C-loss-var↓</th>
+              </tr>
+            </thead>
+            
+            <tbody>
+              <tr>
+                <td>SAC (No Bottleneck)</td>
+                <td class="has-text-centered">117.0±18.6</td>
+                <td class="has-text-centered">1.40±0.12</td>
+                <td class="has-text-centered text-danger">26.4±81.8</td>
+                <td class="has-text-centered text-danger">2.55×10⁷ ± 1.01×10⁸</td>
+                <td class="has-text-centered text-danger">1.32×10¹³ ± 4.78×10¹³</td>
+              </tr>
+              <tr>
+                <td>Linear Bottleneck</td>
+                <td class="has-text-centered">98.9±60.1</td>
+                <td class="has-text-centered">1.18±0.63</td>
+                <td class="has-text-centered">-0.553±2.16</td>
+                <td class="has-text-centered">4.16×10³ ± 7.49×10³</td>
+                <td class="has-text-centered">4.71×10⁵ ± 1.20×10⁶</td>
+              </tr>
+              <tr>
+                <td>Weight Decay</td>
+                <td class="has-text-centered">125.0±33.4</td>
+                <td class="has-text-centered">1.43±0.19</td>
+                <td class="has-text-centered">-0.148±0.30</td>
+                <td class="has-text-centered">23.6±31.6</td>
+                <td class="has-text-centered">157±277</td>
+              </tr>
+              <tr>
+                <td>Tanh Bottleneck</td>
+                <td class="has-text-centered">154.0±30.4</td>
+                <td class="has-text-centered">1.57±0.16</td>
+                <td class="has-text-centered">-0.004±0.05</td>
+                <td class="has-text-centered">0.81±1.02</td>
+                <td class="has-text-centered">14.8±28.4</td>
+              </tr>
+              <tr>
+                <td>LayerNorm Bottleneck</td>
+                <td class="has-text-centered">170.0±36.8</td>
+                <td class="has-text-centered">1.63±0.21</td>
+                <td class="has-text-centered">-0.002±0.05</td>
+                <td class="has-text-centered">0.76±0.74</td>
+                <td class="has-text-centered">8.99±14.3</td>
+              </tr>
+              <tr style="background-color: #fff3cd;">
+                <td style="font-weight: bold; color: #856404;">FPQC-SAC (Ours)</td>
+                <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">195.3±26.9</td>
+                <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">1.71±0.15</td>
+                <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">0.0004±0.05</td>
+                <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">0.54±0.69</td>
+                <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">8.19±13.7</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="help has-text-grey has-text-centered mt-3">
+          Table 2: Bottleneck comparison. FPQC-SAC achieves the lowest TD-variance (0.54) and Q-gap (0.0004), demonstrating superior stability while achieving highest returns.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Experimental Analysis Section: Theoretical Foundations -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-vcentered is-variable is-8">
+      
+      <!-- Left Column: Technical Introduction -->
+      <div class="column is-5">
+        <h2 class="title is-4" style="margin-bottom: 1.5rem;">
+          <span style="margin-right: 0.5rem;">📈</span> Theoretical Mechanisms
+        </h2>
+        
+        <div class="content has-text-justified" style="font-size: 0.95rem; line-height: 1.6; color: #444;">
+          <p style="margin-bottom: 1.2rem;">
+            The superior performance of FPQC-SAC stems from three interconnected quantum-inspired mechanisms that fundamentally alter how noise propagates through the learning pipeline.
+          </p>
+
+          <h4 style="font-size: 1.1rem; color: #222; margin-bottom: 0.5rem;">1. Complex Phase Encoding</h4>
+          <p style="margin-bottom: 1.5rem;">
+            The <strong>R<sub>x</sub> angle encoding</strong> maps classical real-valued inputs into complex exponential phases. This naturally separates signal from noise: the <strong>predictive drift μ</strong> is preserved as a directional phase translation, while the <strong>Brownian diffusion σdW<sub>t</sub></strong> induces an exponential decay factor under expectation. Mathematically: E[e<sup>iω<sup>⊤</sup>Z<sub>t+Δt</sub></sup>] = e<sup>iω<sup>⊤</sup>Z<sub>t</sup> · (Signal Phase) · (Diffusion Attenuation).
+          </p>
+
+          <h4 style="font-size: 1.1rem; color: #222; margin-bottom: 0.5rem;">2. Entanglement-Driven Interference</h4>
+          <p style="margin-bottom: 1.2rem;">
+            The circular <strong>CNOT entanglement chain</strong> creates a structural discriminator. Unstructured noise is scattered into isotropic high-dimensional phase perturbations and undergoes <strong>destructive interference</strong> upon Pauli measurement. Meanwhile, correlated drift signals with temporal and cross-asset structure are aligned along principal directions via trainable rotations, experiencing <strong>constructive interference</strong>.
+          </p>
+
+          <h4 style="font-size: 1.1rem; color: #222; margin-bottom: 0.5rem;">3. Variance Dissipation</h4>
+          <p style="margin-bottom: 1.2rem;">
+            Unlike classical bottlenecks (Tanh, LayerNorm) that merely clip extreme values, the PQC fundamentally <strong>attenuates variance</strong>. By confining states to a norm-preserving complex hypersphere, isotropic phase variations undergo destructive interference. The output variance Var(f<sub>PQC</sub>) is exponentially attenuated relative to input intensity, completely decoupling stability from the infinite-variation nature of raw market SDEs.
+          </p>
+
+          <div style="background-color: #f0f6ff; padding: 1rem; border-left: 5px solid #3273dc; border-radius: 4px;">
+            <p style="margin-bottom: 0; font-weight: 600;">
+              Causal Chain: Interference-driven bottleneck → Suppressed TD variance → Minimal Q-gap → Superior out-of-sample trading performance.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Visualization -->
+      <div class="column is-7">
+        <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
+          <!-- Figure 3: Causal Chain -->
+          <div style="width: 100%; text-align: center;">
+            <div style="padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+              <h3 style="color: white; margin-bottom: 1.5rem;">🔬 Causal Mechanism Chain</h3>
+              <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.9rem; text-align: left;">
+                <div style="padding: 0.8rem; background: rgba(255,255,255,0.2); border-radius: 8px;">
+                  <strong>① PQC Bottleneck</strong> — Hyperspherical phase encoding + Entanglement
+                </div>
+                <div style="text-align: center; font-size: 1.2rem;">⬇️</div>
+                <div style="padding: 0.8rem; background: rgba(255,255,255,0.2); border-radius: 8px;">
+                  <strong>② Noise Cancellation</strong> — Destructive interference of isotropic perturbations
+                </div>
+                <div style="text-align: center; font-size: 1.2rem;">⬇️</div>
+                <div style="padding: 0.8rem; background: rgba(255,255,255,0.2); border-radius: 8px;">
+                  <strong>③ Variance Attenuation</strong> — Exponential suppression of TD-target variance
+                </div>
+                <div style="text-align: center; font-size: 1.2rem;">⬇️</div>
+                <div style="padding: 0.8rem; background: rgba(255,255,255,0.3); border-radius: 8px; border: 2px solid white;">
+                  <strong>④ Superior Returns</strong> — 66.89% gain over standard SAC
+                </div>
+              </div>
+            </div>
+            <p style="font-size: 0.82rem; color: #666; margin-top: 0.5rem;">
+              <strong>Figure 3:</strong> The theoretical causal chain linking quantum representation to trading performance.
+            </p>
+          </div>
+
+          <!-- Figure 4: Portfolio Comparison -->
+          <div style="width: 100%; text-align: center;">
+            <div style="padding: 1.5rem; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef;">
+              <h4 style="color: #3273dc; margin-bottom: 1rem;">Generalization Across Market Regimes</h4>
+              <table class="table is-fullwidth" style="font-size: 0.8rem;">
+                <thead>
+                  <tr style="background-color: #e9ecef;">
+                    <th>Portfolio Type</th>
+                    <th class="has-text-centered">FPQC-SAC</th>
+                    <th class="has-text-centered">SAC</th>
+                    <th class="has-text-centered">Improvement</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Defensive Blue-chip</strong><br/><small style="color: #666;">BAC, JNJ, JPM, PG, WMT, XOM</small></td>
+                    <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">45.01±13.58%</td>
+                    <td class="has-text-centered">27.25±24.62%</td>
+                    <td class="has-text-centered" style="color: #28a745; font-weight: bold;">+65%</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Tech & Market-Index</strong><br/><small style="color: #666;">QQQ, SPY, MSFT, GOOGL, AMZN, AAPL</small></td>
+                    <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">195.32±26.94%</td>
+                    <td class="has-text-centered">117.04±18.56%</td>
+                    <td class="has-text-centered" style="color: #28a745; font-weight: bold;">+67%</td>
+                  </tr>
+                  <tr>
+                    <td><strong>High-Vol Growth</strong><br/><small style="color: #666;">NVDA, META, AVGO, TSLA, NFLX, BRK.B</small></td>
+                    <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">183.26±75.58%</td>
+                    <td class="has-text-centered">133.33±54.18%</td>
+                    <td class="has-text-centered" style="color: #28a745; font-weight: bold;">+37%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size: 0.82rem; color: #666; margin-top: 0.5rem;">
+              <strong>Figure 4:</strong> Cumulative returns across three contrasting market portfolios (2019-2021).
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 4. Quantum Advantage & Ablation Analysis -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-vcentered is-variable is-8">
+      
+      <!-- Left side: Visualizations -->
+      <div class="column is-7">
+        <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
+          
+          <!-- Figure 5: Q-value Stability -->
+          <div style="width: 100%; text-align: center;">
+            <div style="padding: 1.5rem; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef;">
+              <h4 style="color: #3273dc; margin-bottom: 1rem;">Q-Value Estimation Stability</h4>
+              <div style="display: flex; justify-content: center; gap: 2rem; align-items: flex-end; height: 200px; padding: 1rem;">
+                <div style="text-align: center;">
+                  <div style="width: 80px; height: 150px; background: linear-gradient(to top, #dc3545, #ff6b6b); border-radius: 8px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 0.5rem; color: white; font-size: 0.8rem;">
+                    10¹³
+                  </div>
+                  <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #666;">SAC (No Bottleneck)</p>
+                </div>
+                <div style="text-align: center;">
+                  <div style="width: 80px; height: 40px; background: linear-gradient(to top, #ffc107, #ffd93d); border-radius: 8px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 0.5rem; color: #333; font-size: 0.8rem;">
+                    10²
+                  </div>
+                  <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #666;">Tanh/LayerNorm</p>
+                </div>
+                <div style="text-align: center;">
+                  <div style="width: 80px; height: 15px; background: linear-gradient(to top, #28a745, #38ef7d); border-radius: 8px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 0.3rem; color: white; font-size: 0.8rem;">
+                    8.2
+                  </div>
+                  <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #666; font-weight: bold;">FPQC-SAC</p>
+                </div>
+              </div>
+              <p style="font-size: 0.8rem; color: #666; margin-top: 1rem;">
+                Critic Loss Variance (log scale) — Lower is better
+              </p>
+            </div>
+            <p style="font-size: 0.82rem; color: #666; margin-top: 0.5rem;">
+              <strong>Figure 5:</strong> Q-value estimation stability comparison showing 12 orders of magnitude improvement.
+            </p>
+          </div>
+
+          <!-- Figure 6: Ablation Study -->
+          <div style="width: 100%; text-align: center;">
+            <div style="padding: 1.5rem; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef;">
+              <h4 style="color: #3273dc; margin-bottom: 1rem;">Ablation Study: PQC Components</h4>
+              <table class="table is-fullwidth" style="font-size: 0.8rem;">
+                <thead>
+                  <tr style="background-color: #e9ecef;">
+                    <th>Configuration</th>
+                    <th class="has-text-centered">CR%</th>
+                    <th class="has-text-centered">SR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="background-color: #fff3cd;">
+                    <td><strong>Full FPQC-SAC</strong></td>
+                    <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">195.3</td>
+                    <td class="has-text-centered" style="color: #d32f2f; font-weight: bold;">1.71</td>
+                  </tr>
+                  <tr>
+                    <td>w/o CNOT Entanglement</td>
+                    <td class="has-text-centered">142.1</td>
+                    <td class="has-text-centered">1.52</td>
+                  </tr>
+                  <tr>
+                    <td>w/o Trainable Rotations</td>
+                    <td class="has-text-centered">128.5</td>
+                    <td class="has-text-centered">1.45</td>
+                  </tr>
+                  <tr>
+                    <td>Classical MLP (same params)</td>
+                    <td class="has-text-centered">136.0</td>
+                    <td class="has-text-centered">1.53</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size: 0.82rem; color: #666; margin-top: 0.5rem;">
+              <strong>Figure 6:</strong> Ablation study demonstrating the necessity of quantum entanglement and trainable rotations.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right side: Technical Analysis -->
+      <div class="column is-5">
+        <h2 class="title is-4" style="margin-bottom: 1.5rem;">
+          <span style="margin-right: 0.5rem;">⚙️</span> Quantum Advantage & Ablations
+        </h2>
+        
+        <div class="content has-text-justified" style="font-size: 0.95rem; line-height: 1.6; color: #444;">
+          
+          <h4 style="font-size: 1.1rem; color: #222; margin-bottom: 0.5rem;">1. Stability vs. Classical Bottlenecks</h4>
+          <p style="margin-bottom: 1.2rem;">
+            While classical bounded activations (Tanh, LayerNorm) achieve moderate stability, they cannot fully suppress noise while retaining weak predictive signals. FPQC-SAC achieves <strong>12 orders of magnitude</strong> lower critic loss variance compared to unconstrained SAC (10¹³ → 8.19), while simultaneously delivering the <strong>highest returns</strong> (195.3% vs. 154-170% for classical methods).
+          </p>
+
+          <h4 style="font-size: 1.1rem; color: #222; margin-bottom: 0.5rem;">2. Entanglement is Essential</h4>
+          <p style="margin-bottom: 1.5rem;">
+            Ablation studies reveal that removing <strong>CNOT entanglement gates</strong> causes performance to drop from 195.3% to 142.1% cumulative return. Without entanglement, noise remains isolated within single-qubit subspaces rather than being scattered into dimensions where destructive interference can occur. This confirms that quantum entanglement is not merely a computational artifact—it is the <strong>core mechanism</strong> enabling noise-signal separation.
+          </p>
+
+          <h4 style="font-size: 1.1rem; color: #222; margin-bottom: 0.5rem;">3. Trainable Rotations Matter</h4>
+          <p style="margin-bottom: 1.2rem;">
+            Freezing the quantum rotation matrices (using fixed random angles) reduces returns to 128.5%, below even classical MLP baselines. This demonstrates that the <strong>trainability</strong> of the quantum circuit is crucial—static quantum feature maps cannot adapt to market regime shifts or align coherent signals along optimal measurement axes.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- BibTeX -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title section-title"><span class="header-icon">📚</span>BibTeX</h2>
+    <pre><code>@article{anonymous2026fpqc,
+  author    = {Anonymous Author(s)},
+  title     = {Mitigating Bias in Low-SNR Financial Reinforcement Learning via Quantum Representations},
+  journal   = {40th Conference on Neural Information Processing Systems (NeurIPS 2026)},
+  year      = {2026},
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Website adapted from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+      </p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
